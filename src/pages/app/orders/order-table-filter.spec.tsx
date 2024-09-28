@@ -1,25 +1,8 @@
 import { render } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { createMemoryRouter, MemoryRouter, Router } from 'react-router-dom'
+import { MemoryRouter } from 'react-router-dom'
 
 import { OrderTableFilter } from './order-table-filters'
-
-export const renderWithRouter= (
-    pathToSet,
-    …component
-    ) => {
-    const history = createMemory({ initialEntries: [pathToSet] });
-    
-    render(
-       <Router his={history}>
-          {component}
-       </Router>
-    )
-    
-    return{
-    history
-    }
-}
 
 describe('OrderTableFilter', () => {
   it('should check if the fields are filled according to path data', () => {
@@ -82,8 +65,6 @@ describe('OrderTableFilter', () => {
     ) as HTMLInputElement
 
     const statusButton = wrapper.queryByDisplayValue('Pendente')
-
-    const {} = renderW
 
     expect(nameInput.value).toEqual('')
     expect(OrderId.value).toEqual('')
