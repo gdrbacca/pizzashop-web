@@ -1,0 +1,581 @@
+•Tailwind------------
+
+pnpm add -D tailwindcss postcss autoprefixer
+npx tailwindcss init -p
+
+(se não for usar tailwind, e usar styled-components ou stitches, por exemplo,
+no projeto vite cria uma pasta styles no src, e pode criar um global.ts:
+    •createGlobalStyle com themes/default.ts, com <ThemeProvider theme={defaultTheme}> e
+      <GlobalStyle /> np App.tsx, se for styles-components
+    •const { styled, ... } = createStitches({}) com theme: {} dentro, colocando coisas como fonts: {}, colors: {}, etc, 
+      e criando um globalStyles = globalCss({}) no global.ts, e chamado globalStyles()
+      no App.tsx)
+
+No Tailwind.config da pra criar temas padrão, dentro de theme: { extend: {
+  exemplos:
+	fontFamily: {
+        	sans: "Inter",
+      	},
+      	boxShadow: {
+        	shape: "0px 8px 8px rgba(0, 0, 0, 0.1), 0px 4px 4px rgba(0, 0, 0, 0.1), 0px 2px 2px rgba(0, 0, 0, 0.1), 0px 0px 0px 1px rgba(0, 0, 0, 0.1), inset 0px 0px 0px 1px rgba(255, 255, 255, 0.03), inset 0px 1px 0px rgba(255, 255, 255, 0.03)",
+      	},
+      	backgroundImage: {
+        	pattern: 'url(/bg.png)',
+      	},
+
+Criar modal meio da tela, bom para os radix/dialog
+	className="fixed inset-0 bg-black/60 flex items-center justify-center"
+
+•Shadcn--------------
+
+# (so you can import "path" without error)
+pnpm i -D @types/node
+
+pnpm install shadcn-ui@latest
+pnpm dlx shadcn-ui@latest init
+
+# caso necessário, alterar de @/components para src/components(/lib) na pergunta, 
+# mas depois usando @/... nas importações
+
+pnpm dlx shadcn-ui@latest add button
+
+
+•Eslint --------------
+
+pnpm i eslint @rocketseat/eslint-config -D
+
+Cria o .eslintrc.json, preenche com o seguinte:
+    {
+        "extends": ["@rocketseat/eslint-config/react"]
+    }
+
+
+Comando para migrar para formato novo: npx @eslint/migrate-config .eslintrc.json
+
+Já no eslint.config.mjs, coloca:
+    export default [
+        ...compat.extends('@rocketseat/eslint-config/react'),
+        { files: ['src/**/*'] },
+    ]
+
+Exemplo do formato novo completo:
+
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+import js from '@eslint/js'
+import { FlatCompat } from '@eslint/eslintrc'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+const compat = new FlatCompat({
+  baseDirectory: __dirname,
+  recommendedConfig: js.configs.recommended,
+  allConfig: js.configs.all,
+})
+export default [
+  ...compat.extends('@rocketseat/eslint-config/react'),
+  ...compat.plugins('simple-import-sort'),
+
+  {
+    files: ['src/**/*'],
+    rules: {
+      'simple-import-sort/imports': 'error',
+    },
+  },
+]
+
+
+(para ordenar imports)
+pnpm i -D eslint-plugin-simple-import-sort
+
+eslint.config.mjs, coloca:
+
+    ...compat.plugins('simple-import-sort'),
+
+    {
+        files: ['src/**/*'],
+        rules: {
+            'simple-import-sort/imports': 'error',
+        },
+    },
+
+•Prettier-------------
+
+pnpm i -D prettier-plugin-tailwindcss
+
+versão 0.6.+
+>cria .prettierrc, e coloca
+
+    {
+        "plugins": ["prettier-plugin-tailwindcss"]
+    }
+
+
+•React router dom---------------
+
+pnpm i react-router-dom
+
+pnpm i localforage match-sorter sort-by
+
+cria um routes.tsx na raiz e coloca:
+
+    export const router: ReturnType<typeof createBrowserRouter> =
+        createBrowserRouter([
+            {
+                path: '/',
+                element: <AppLayout />,
+                children: [{ path: '/', element: <Componente /> }],
+            },
+        ])
+
+dentro de pages, criar a pasta _layouts e ali colocar os layouts padrão, 
+components serão subrotas
+
+no App.tsx da return <RouterProvider router={router} /> 
+
+para receber parametro, usar no path: '/teste/:param'
+
+•SEO(react-helmet-async)------------------
+
+pnpm i react-helmet-async
+
+no App.tsx, colocar por volta: 
+    <HelmetProvider>
+      <Helmet titleTemplate="%s | nomeapp" />
+
+
+•Formularios HookForm
+    pnpm i react-hook-form zod @hookform/resolvers
+
+    const signInForm = z.object({
+        email: z.string().email(),
+        ...
+    })
+
+    type SignInForm = z.infer<typeof signInForm>
+
+    const { register, handleSubmit } = useForm<SignInForm>({})
+
+•Formularios alternativa
+	no método chamado no onSubmit, receber como FormEvent<HTMLFormElement>
+	criar um new FormData(event.currentTarget)
+	essa nova variavel acessa com .get("name do campo")
+
+•Toast
+    pnpm i sonner
+
+    <Toaster ...params /> no App.tsx
+
+    toast.success(msg, {action: {label: '', onClick: () => navigate('/page)}})
+
+•Dica para menu com Tailwind
+    Criar um componente Header, dentro dele um <nav>, com NavLinks, que são componentes tambem
+
+    No NavLink, cria uma interface NavLinkProps extends LinkProps {}
+    return um <Link  {...props} />
+
+    cria um const { pathname } = useLocation() para pegar o pathname
+
+    dentro do <Link /> cria um data-(nome)={pathname === props.to} para 
+        conferir se é o path que está na url o mesmo do link
+    
+    dentro do className usa o data-[nome=true]: para aplicar css adequado
+
+•dark/light theme
+    https://ui.shadcn.com/docs/dark-mode/vite
+
+    pnpm npx shadcn-ui@latest add dropdown-menu
+
+    colocar <ThemeToggle /> no header
+    <ThemeProvider defaultTheme="dark" storageKey="pizzashop-theme"> por volta
+        do Routes ou do children
+
+•Componente customizável
+	Cria um Button{{children, ...props}: ButtonProps} por exemplo, contendo uma 	interface:
+		interface ButtonProps extends ComponentProps<'button'> {
+    			children: ReactNode
+		}
+		
+		<button {...props} />
+
+
+•Validação para .env (vite)
+
+    env.ts: 
+
+    import { z } from 'zod'
+
+    const envSchema = z.object({
+        VITE_API_URL: z.string().url(),
+        VITE_ENABLE_API_DELAY: z.string().transform((value) => value === 'true'),
+    })
+
+    export const env = envSchema.parse(import.meta.env)
+
+•Atualização de cash com useMutation 
+    (para dados com stale: Infinity, que não recarregaria após adicionar o dado no server)
+
+    Com isso, podemos fazer a requisição de um post, e em vez de buscar com get novamente,
+    apenas mudamos oq está no cash, em caso de success, pq aí está igual com oq foi salvo.
+
+    Nesse exemplo o useQuery que carrega na tela guarda essa req no 'managed-restaurant'
+    Assim deve-se trabalhar com esse cash no onSuccess, chamando-o e alterando os dados necessários
+    *queryClient = useQueryClient()
+    *GetProfileRestaurant é interface da api chamada no useQuery
+    *{name, description} é oq foi mandado no mutationFn: updateProfile,
+
+    dentro do useMutation:
+        mutationFn: updateProfile,
+        onSuccess(_, { name, description }) {
+            const cashed = queryClient.getQueryData<GetProfileRestaurant>([
+                'managed-restaurant',
+            ])
+            if (cashed) {
+                queryClient.setQueryData<GetProfileRestaurant>(['managed-restaurant'], {
+                    ...cashed,
+                    name,
+                    description,
+                })
+            }
+        },
+
+•Array pre-definido e Record
+
+    type OrderStatus =
+    | 'pending'
+    | 'canceled'
+    | 'processing'
+    | 'delivering'
+    | 'delivered'
+
+    interface OrderStatusProps {
+    status: OrderStatus
+    }
+
+    const orderStatusMap: Record<OrderStatus, string> = {
+    pending: 'Pendente',
+    canceled: 'Cancelado',
+    delivered: 'Entregue',
+    delivering: 'Em entrega',
+    processing: 'Em preparo',
+    }
+
+    <span className="font-medium text-muted-foreground">
+        {orderStatusMap[status]}
+    </span>
+
+•Controlle do radix
+    Exemplo com um Select
+
+    <Controller
+        name="status"
+        control={control}
+        render={({ field: { name, onChange, value, disabled } }) => {
+          return (
+            <Select
+              defaultValue="all"
+              name={name}
+              onValueChange={onChange}
+              value={value}
+              disabled={disabled}
+            >
+              <SelectTrigger className="h-8 w-[180px]">
+                <SelectValue />
+              </SelectTrigger>
+
+              <SelectContent>
+                <SelectItem value="all">Todos status</SelectItem>
+                <SelectItem value="pending">Pendente</SelectItem>
+                <SelectItem value="canceled">Cancelado</SelectItem>
+                <SelectItem value="processing">Em preparo</SelectItem>
+                <SelectItem value="delivering">Em entrega</SelectItem>
+                <SelectItem value="delivered">Entrege</SelectItem>
+              </SelectContent>
+            </Select>
+          )
+        }}
+      />
+
+•Alterar cache de item em listas já carregadas no useQuery
+
+    >Chama a função no onSuccess do mutation:
+    
+    onSuccess(_, { orderId }) {
+        updateStatusOnCache(orderId, 'canceled')
+    },
+
+
+    >Vai percorrer todas as listas cacheadas que começam com 'orders', então percorrer
+    todas as orders dessa lista, e verificar em cada uma se é o mesmo orderId, Assim
+    alterando o status para o que foi passado no parametro
+
+    function updateStatusOnCache(orderId: string, status: OrderStatus) {
+        const cached = queryClient.getQueriesData<getOrdersResponse>({
+            queryKey: ['orders'],
+        })
+
+        cached.forEach(([cacheKey, cacheData]) => {
+            if (!cacheData) return
+
+            queryClient.setQueryData<getOrdersResponse>(cacheKey, {
+                ...cacheData,
+                orders: cacheData.orders.map((order) => {
+                if (order.orderId === orderId) {
+                    return { ...order, status }
+                }
+
+                return order
+                }),
+            })
+        })
+    }
+
+•Interceptando erro de autenticação com Axios
+
+    >Feito do layout. Nesse caso, se der erro no backend, intercepta a resposta,
+    verificando o erro, pegando status e o codigo de erro, gerados pelo backend,
+    e navegando para login
+
+    const navigate = useNavigate()
+
+    useEffect(() => {
+        const interceptorId = api.interceptors.response.use(
+            (response) => response,
+            (error) => {
+                if (isAxiosError(error)) {
+                    const status = error.response?.status
+                    const code = error.response?.data.code
+
+                    if (status === 401 && code === 'UNAUTHORIZED') {
+                        navigate('/sign-in', { replace: true })
+                    }
+                    else {
+                        throw error
+                    }
+                }
+            },
+        )
+
+        return () => {
+            api.interceptors.response.eject(interceptorId)
+        }
+    }, [navigate])
+
+•Testes usando Vitest
+
+    pnpm add -D vitest
+    package.json: "test": "vitest --config ./vitest.config.ts" (apenas vitest se usar o arquivo vite)
+
+    pnpm install -D @testing-library/react @testing-library/dom
+    pnpm install -D @testing-library/jest-dom
+    pnpm install -D happy-dom
+
+
+    (Usando arquivo separado vitest.config.ts):
+        import { defineConfig } from 'vitest/config'
+
+        export default defineConfig({
+            test: {
+                globals: true,
+                setupFiles: ['./test/setup.ts'],
+                environment: 'happy-dom',
+            },
+        })
+
+    (Usando o arquivo vite.config.ts)
+        import path from 'node:path'
+        import { defineConfig, UserConfig } from 'vite'
+        import react from '@vitejs/plugin-react'
+        import { InlineConfig } from 'vitest/node'
+
+        // https://vitejs.dev/config/
+        export default defineConfig({
+            ...
+            test: {
+                globals: true,
+                setupFiles: ['./test/setup.ts'],
+                environment: 'happy-dom',
+            },
+        } as UserConfig & {
+            test: InlineConfig
+        })
+
+•Testar click de botão no Vitest
+    (p)npm i -D @testing-library/user-event
+
+    Fora de tudo: const onPageChangeCallback = vi.fn()
+
+    Dentro do describe, para limpar caches de chamadas:
+        beforeEach(() => {
+            onPageChangeCallback.mockClear()
+        })
+
+    Exemplo do Pagination:
+
+        const user = userEvent.setup()
+
+        const wrapper = render(
+        <Pagination
+            pageIndex={0}
+            totalCount={200}
+            perPage={10}
+            onPageChange={onPageChangeCallback}
+        />,
+        )
+
+        const nextPageButton = wrapper.getByRole('button', {
+        name: 'Próxima página',
+        })
+
+        await user.click(nextPageButton)
+
+        expect(onPageChangeCallback).toHaveBeenCalled()
+
+
+•Mock setup
+
+npm i msw -D
+npm msw init public
+
+>Criar pasta mocks em algum lugar, dentro da /api de preferencia
+>Criar ali index.ts com o seguinte codigo:
+    import { setupWorker } from 'msw/browser'
+
+    import { env } from '@/env'
+
+    export const worker = setupWorker()
+
+    export async function enableMSW() {
+        if (env.MODE === 'test') return
+        await worker.start()
+    }
+
+>Onde estiver tratando as variaveis de ambiente (env.ts), tratar a variavel MODE:
+    MODE: z.enum(['production', 'development', 'test']),
+
+>Criar script no package.json:
+    "dev:test": "vite --port 50789 --mode test"
+
+>Envolver o ReactDOM do main.tsx com o seguinte:
+    enableMSW().then(() => {})
+
+
+•Exemplo de mock
+
+>Criar um sign-in-mock.ts, pode ser onde está o index, com o seguinte conteudo:
+
+    import { http, HttpResponse } from 'msw'
+
+    import { SignInBody } from '../sign-in'
+
+    export const signInMock = http.post<never, SignInBody>(
+        '/authenticate',
+        async ({ request }) => {
+            const { email } = await request.json()
+
+            if (email === 'johndoe@gmail.com') {
+                return new HttpResponse(null, {
+                    status: 200,
+                    headers: {
+                        'Set-Cookie': 'auth=example-jwt',
+                    },
+                })
+            }
+
+            return new HttpResponse(null, { status: 401 })
+        },
+    )
+
+>No index, colocar esse cara, o signInMock, dentro do setupWorker
+>Criar um .env.test, com as mesmas variáveis, porem a url sendo "/"
+
+
+•UseFormContext  (para dividir o form em componentes diferentes)
+
+>No componente principal:
+
+import { useForm, FormProvider } from 'react-hook-form'
+
+const newDeliveryValidationSchema = zod.object({
+  cep: zod.string(),
+  rua: zod.string(),
+  ...
+})
+
+export type NewDeliveryFormData = zod.infer<typeof newDeliveryValidationSchema>
+
+export function Cart() {
+    const newDeliveryForm = useForm<NewDeliveryFormData>({
+        resolver: zodResolver(newDeliveryValidationSchema),
+        defaultValues: {
+            type: 'credito',
+        },
+    })
+
+    <form onSubmit={handleSubmit(handleCreateNewDelivery)} action="">
+      <Wrapper>
+        <FormProvider {...newDeliveryForm}>
+          <FormDelivery />
+          <CartDelivery />
+        </FormProvider>
+      </Wrapper>
+    </form>
+}
+
+>No componente interno:
+
+const { register, control } = useFormContext()
+
+
+•Dica sobre interface e types
+
+export interface getOrdersResponse {
+  orders: {
+    orderId: string
+    createdAt: string
+    status: 'pending' | 'canceled' | 'processing' | 'delivering' | 'delivered'
+    customerName: string
+    total: number
+  }[]
+  meta: {
+    pageIndex: number
+    perPage: number
+    totalCount: number
+  }
+}
+
+>Criar tipagem de parte da interface:
+
+type Orders = getOrdersResponse['orders']
+type OrderStatus = getOrdersResponse['orders'][number]['status']
+
+//exemplo de uso da tipagem
+const statuses: OrderStatus[] = [
+  'pending',
+  'processing',
+  'canceled',
+  'delivering',
+  'delivered',
+]
+
+
+•Maneiras de setar cor de fundo padrão
+
+>No index.html, com tailwind:
+    <body class="bg-zinc-950 text-zinc-50 antialiased">
+
+>Com stitches ou styled-components, no global.ts:
+    body: {
+        backgroundColor: '$gray800',
+        color: '$gray100',
+    },
+
+>No shadcn, que possui tema dark, no index.css:
+    @layer base {
+        * {
+            ply border-border;
+        }
+        body {
+            @apply bg-background text-foreground;
+        }
+    }
