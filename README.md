@@ -1,3 +1,4 @@
+[cover](./.github/cover.png)
 
 # Pizza Shop
 
