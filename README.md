@@ -1,4 +1,4 @@
-[cover](./.github/cover.png)
+![cover](./.github/cover.png)
 
 # Pizza Shop
 
